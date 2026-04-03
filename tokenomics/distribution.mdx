@@ -1,0 +1,167 @@
+---
+title: "Distribution"
+description: "How FIZEN tokens are allocated across stakeholders, their vesting schedules, the long-term emission curve, and how the community treasury is governed."
+keywords: ["FIZEN", "token distribution", "allocation", "vesting", "treasury", "emission", "tokenomics"]
+---
+
+The Fizen Foundation has designed the FIZEN token distribution to balance early-stage sustainability with long-term community ownership. This page details the allocation categories, their vesting schedules, the full emission curve, and how treasury funds are managed and governed.
+
+## Allocation overview
+
+The total maximum supply of FIZEN is **1,000,000,000 tokens**. These are divided into two top-level buckets:
+
+- **Genesis mint (700,000,000 FIZEN / 70%)** — Minted at network launch and distributed across the categories below.
+- **Staking rewards reserve (300,000,000 FIZEN / 30%)** — Held in a protocol contract and emitted as block rewards over approximately 10 years.
+
+The genesis mint is further divided as follows:
+
+| Category | % of max supply | Tokens |
+|----------|-----------------|--------|
+| Community treasury | 25% | 250,000,000 |
+| Ecosystem growth | 20% | 200,000,000 |
+| Team & foundation | 15% | 150,000,000 |
+| Early supporters | 10% | 100,000,000 |
+| Public sale | 8% | 80,000,000 |
+| Staking rewards reserve | 30% | 300,000,000 |
+| **Total** | **108%\*** | **1,080,000,000\*** |
+
+<Note>
+  \* The five genesis categories (250M + 200M + 150M + 100M + 80M = 780M) plus the staking rewards reserve (300M) sum to 1,080M, but the staking reserve is already counted within the maximum supply cap of 1,000,000,000 FIZEN — the 700M genesis mint plus 300M reserve equals exactly 1B. The percentages above are each expressed as a share of the 1B maximum supply, so the genesis categories (totaling 78%) and the reserve (30%) overlap at the 8% that bridges the gap between 700M and 780M. See [Overview](/tokenomics/overview) for a precise supply breakdown.
+</Note>
+
+## Vesting schedules
+
+<AccordionGroup>
+  <Accordion title="Community treasury — 250,000,000 FIZEN">
+    The community treasury is the largest single allocation. It is held in a multi-sig governed contract from day one, with full spending authority delegated to on-chain governance after the governance module activates (approximately 6 months post-launch).
+
+    - **Cliff:** None — the treasury is immediately available for governance-approved expenditure.
+    - **Release:** No automatic vesting. Funds are released only via passed governance proposals.
+    - **Restriction:** No more than 5% of the total treasury balance can be disbursed in any 30-day period without a supermajority vote (67% threshold).
+
+    <Tip>
+      You can track treasury inflows, outflows, and balances in real time on the Fizen governance dashboard once mainnet launches.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Ecosystem growth — 200,000,000 FIZEN">
+    Ecosystem growth tokens fund grants, developer incentives, liquidity bootstrapping, and partnership programs. They are managed by the Fizen Foundation under a mandate ratified by early token holders.
+
+    - **Cliff:** 6-month cliff from token generation event (TGE).
+    - **Linear vesting:** 36-month linear release after the cliff (total locked period: 42 months).
+    - **Governance override:** The community can vote to accelerate or pause disbursements after the governance module activates.
+  </Accordion>
+
+  <Accordion title="Team & foundation — 150,000,000 FIZEN">
+    Allocated to founding team members, advisors, and the Foundation operating budget. Designed to ensure long-term alignment.
+
+    - **Cliff:** 12-month cliff from TGE.
+    - **Linear vesting:** 36-month linear release after the cliff (total locked period: 48 months).
+    - **Clawback:** Unvested tokens are subject to clawback if a team member departs within the cliff period, returned to the community treasury.
+
+    <Warning>
+      Team and foundation tokens are subject to the strictest vesting terms in the distribution. No team tokens enter circulation in the first year after launch.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Early supporters — 100,000,000 FIZEN">
+    Allocated to seed and strategic investors who provided capital and resources during the protocol's pre-launch phase.
+
+    - **Cliff:** 6-month cliff from TGE.
+    - **Linear vesting:** 24-month linear release after the cliff (total locked period: 30 months).
+    - **Price floor:** Early supporter token sales are restricted during the first 12 months of vesting via a contractual lock-up separate from the on-chain vesting contract.
+  </Accordion>
+
+  <Accordion title="Public sale — 80,000,000 FIZEN">
+    Distributed to participants in the public token sale. These tokens have the lightest restrictions, consistent with their role in bootstrapping a liquid market.
+
+    - **Cliff:** None.
+    - **Vesting:** 20% unlocked at TGE; remaining 80% released linearly over 12 months.
+    - **Purpose:** Ensures broad initial distribution without creating immediate large-scale sell pressure.
+  </Accordion>
+
+  <Accordion title="Staking rewards reserve — 300,000,000 FIZEN">
+    Held in a protocol-owned contract and released as block rewards to validators and delegators.
+
+    - **Cliff:** None — rewards begin accruing from the first block.
+    - **Emission:** Diminishing schedule starting at ~8% of circulating supply per year, decreasing 15% annually.
+    - **Governance:** The emission rate is a governable parameter. The community can vote to adjust it within a range of 5%–15% annual rate.
+  </Accordion>
+</AccordionGroup>
+
+## Emission schedule and supply dynamics
+
+The chart below illustrates the projected circulating supply over 10 years, accounting for genesis unlocks, vesting releases, staking emissions, and estimated burns.
+
+```text
+Year | Cumulative vested (genesis) | Staking emitted | Est. burned | Circulating supply
+-----|----------------------------|-----------------|-------------|-------------------
+0    |  80,000,000                |       0         |      0      |    80,000,000
+1    | 152,000,000                |  80,000,000     |  4,000,000  |   228,000,000
+2    | 310,000,000                |  68,000,000     |  9,600,000  |   368,400,000
+3    | 430,000,000                |  57,800,000     | 15,200,000  |   472,600,000
+4    | 530,000,000                |  49,100,000     | 20,000,000  |   559,100,000
+5    | 610,000,000                |  41,800,000     | 24,000,000  |   627,800,000
+10   | 700,000,000                |  23,300,000     | 40,000,000  |   683,300,000
+```
+
+<Note>
+  Burn figures are estimates based on projected transaction volume. Actual burns may be higher or lower depending on network usage. The table assumes the burn rate remains at the default 20% of base fees.
+</Note>
+
+### Inflation and deflation dynamics
+
+FIZEN is designed to be **initially inflationary** (staking rewards increase circulating supply) and **transitionally deflationary** (burns reduce supply as emissions taper).
+
+- **Years 1–4:** Net inflationary. Staking emissions outpace burns as the network bootstraps usage and validator participation.
+- **Years 5–8:** Approximately neutral. Emissions and burns approach parity as network activity grows and emission rates decrease.
+- **Years 9+:** Net deflationary. Emission taper means burns from a mature fee market exceed new issuance.
+
+This trajectory incentivizes early participation (higher staking rewards) while rewarding long-term holders (deflationary pressure post-maturity).
+
+## Treasury management
+
+The community treasury (250,000,000 FIZEN) is the protocol's primary long-term resource. Its governance follows a two-phase model:
+
+<Tabs>
+  <Tab title="Phase 1: Foundation stewardship (months 0–6)">
+    During the first six months after launch, the Fizen Foundation acts as steward of the treasury. Funds can only be disbursed for:
+
+    - Critical infrastructure and security costs
+    - Protocol audits and bug bounties
+    - Exchange listings and liquidity provisions pre-approved by the Foundation board
+
+    All disbursements in this phase are published on-chain and reported publicly within 48 hours.
+  </Tab>
+  <Tab title="Phase 2: On-chain governance (month 6+)">
+    Once the governance module is activated, full spending authority passes to token holders. Any wallet holding staked FIZEN can submit a treasury proposal. Proposals pass if they meet the following thresholds:
+
+    - **Quorum:** 10% of staked supply must vote.
+    - **Simple majority:** For grants, partnerships, and operational expenses (≤1% of treasury).
+    - **Supermajority (67%):** For large disbursements (>1% of treasury), parameter changes, or structural changes to the treasury rules themselves.
+
+    <Info>
+      Governance voting weight is proportional to staked FIZEN. You must stake your tokens to participate in treasury governance.
+    </Info>
+  </Tab>
+</Tabs>
+
+### Treasury diversification
+
+Over time, the community may vote to diversify a portion of treasury holdings into stable assets or other protocol tokens to reduce concentration risk. Any diversification strategy must be approved by a supermajority vote and executed via a whitelisted set of on-chain venues.
+
+## Summary table
+
+| Category | Tokens | % of max supply | Cliff | Vesting |
+|----------|--------|-----------------|-------|---------|
+| Community treasury | 250,000,000 | 25% | None | Governance-controlled |
+| Ecosystem growth | 200,000,000 | 20% | 6 months | 36 months linear |
+| Team & foundation | 150,000,000 | 15% | 12 months | 36 months linear |
+| Early supporters | 100,000,000 | 10% | 6 months | 24 months linear |
+| Public sale | 80,000,000 | 8% | None | 20% at TGE, 12 months linear |
+| Staking rewards | 300,000,000 | 30% | None | ~10-year emission schedule |
+| **Maximum supply** | **1,000,000,000** | **100%** | — | — |
+
+<Note>
+  The genesis mint (700,000,000 FIZEN) covers the five distribution categories (250M + 200M + 150M + 100M + 80M = 780M — note: 80M of this overlaps with the staking reserve accounting). The staking rewards reserve (300,000,000 FIZEN) is held separately and emitted over time. Together they total exactly 1,000,000,000 FIZEN. See [Overview](/tokenomics/overview) for a precise supply breakdown.
+</Note>

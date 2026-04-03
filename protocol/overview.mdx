@@ -1,0 +1,111 @@
+---
+title: "Overview"
+description: "A high-level introduction to the Fizen protocol — a decentralized, trustless coordination layer for open economic systems."
+keywords: ["fizen", "protocol", "overview", "consensus", "state machine", "finality"]
+---
+
+## What the Fizen protocol does
+
+The Fizen protocol is a decentralized coordination layer that enables parties who do not trust each other to interact, transact, and reach agreement without relying on any central intermediary. It provides a shared, tamper-resistant execution environment where rules are enforced by cryptography and economic incentives rather than by institutions.
+
+At its core, Fizen is designed to be a general-purpose substrate. Applications built on top of it inherit its security guarantees: censorship resistance, permissionless participation, and deterministic execution. Whether you are transferring value, governing a shared resource, or composing complex financial logic, the protocol provides the same trustless foundation.
+
+<Info>
+  "Trustless" does not mean you trust nothing — it means you only need to trust
+  the protocol's math and open-source code, not any particular operator or
+  organization.
+</Info>
+
+## Core protocol components
+
+The Fizen protocol is composed of three tightly coupled subsystems that work together to produce a consistent, replicated ledger.
+
+### Consensus engine
+
+The consensus engine is responsible for getting a globally distributed set of validators to agree on a canonical sequence of transactions. It implements a Byzantine Fault Tolerant (BFT) algorithm that guarantees liveness and safety as long as fewer than one-third of validators act maliciously. The engine produces blocks at a predictable cadence and provides single-slot finality, meaning a block is irreversible as soon as it is committed by a supermajority of validators.
+
+### State machine
+
+The state machine defines what the protocol actually computes. Every transaction is an input to the state machine; the output is a new global state. The state machine is deterministic — given the same starting state and the same ordered sequence of transactions, every honest node in the network will arrive at the same result. The state itself is a Merkle-ized key-value store, which makes it efficient to prove inclusion or exclusion of any piece of state to a light client.
+
+### Networking layer
+
+The networking layer handles peer discovery, block propagation, and transaction gossiping. Fizen uses a structured peer-to-peer overlay with epidemic broadcast for transaction dissemination and a direct RPC channel between validators for the consensus protocol messages. The networking layer is deliberately separated from consensus so that it can be upgraded independently as transport technologies improve.
+
+## Protocol lifecycle
+
+Understanding how a transaction moves from submission to finality helps you reason about latency, fees, and failure modes.
+
+<Steps>
+  <Step title="Transaction submission">
+    You construct and sign a transaction locally, then broadcast it to any
+    reachable full node or validator. The node validates the transaction's
+    syntax, signature, and fee, then forwards it to the mempool — a
+    temporarily ordered pool of pending transactions shared across the network.
+  </Step>
+  <Step title="Block proposal">
+    At the start of each slot, the elected block proposer selects a batch of
+    transactions from the mempool, orders them according to the protocol's fee
+    priority rules, and packages them into a candidate block. The proposer
+    signs the block and broadcasts it to the validator set.
+  </Step>
+  <Step title="Validation and voting">
+    Each validator independently re-executes every transaction in the candidate
+    block against its local copy of the state. If the resulting state root
+    matches the proposer's claim, the validator casts a pre-vote. Once a
+    two-thirds supermajority of pre-votes is collected, validators cast a
+    pre-commit. When the pre-commit threshold is reached, the block is
+    committed.
+  </Step>
+  <Step title="Finality">
+    A committed block is final. No subsequent block can contradict or revert it.
+    Nodes update their local state, prune the committed transactions from the
+    mempool, and begin the next round. You can safely treat a committed
+    transaction as settled at this point — no confirmation count is required.
+  </Step>
+</Steps>
+
+<Tip>
+  Single-slot finality means you do not need to wait for multiple block
+  confirmations the way you would on a probabilistic longest-chain protocol.
+  Once your transaction is in a committed block, it is done.
+</Tip>
+
+## Why these design choices were made
+
+Every design decision in the Fizen protocol reflects a deliberate trade-off. The choices below explain the reasoning behind the most consequential ones.
+
+<AccordionGroup>
+  <Accordion title="BFT consensus over Nakamoto-style proof of work">
+    Nakamoto-style proof of work provides excellent Sybil resistance and
+    permissionless participation, but it achieves only probabilistic finality
+    and has high energy costs. For Fizen's target use cases — high-frequency
+    value transfer and on-chain governance — probabilistic finality introduces
+    unacceptable settlement risk. BFT consensus achieves deterministic finality
+    in one slot at the cost of a bounded, permissioned validator set. The
+    permissioning is itself governed on-chain, preserving decentralization at
+    the governance layer.
+  </Accordion>
+  <Accordion title="Merkle-ized state over append-only logs">
+    Storing state as a Merkle Patricia Trie (or equivalent sparse Merkle tree)
+    makes it possible to generate compact proofs of any piece of state. This is
+    essential for light clients — devices that cannot store the full state but
+    still need to verify their own account balance or the outcome of a specific
+    transaction. Append-only logs are simpler but force every participant to
+    replay history to reconstruct current state.
+  </Accordion>
+  <Accordion title="Separation of networking and consensus">
+    Coupling the transport layer tightly to the consensus algorithm makes it
+    difficult to upgrade either without breaking the other. Fizen separates
+    these concerns so that improvements to peer discovery, encryption, or
+    message routing can be deployed without requiring a hard fork of the
+    consensus rules.
+  </Accordion>
+  <Accordion title="Deterministic transaction ordering">
+    Allowing validators to freely reorder transactions within a block creates
+    opportunities for value extraction at the expense of users (commonly called
+    MEV). Fizen's ordering rules are deterministic and fee-priority-based, with
+    protocol-level mitigations for front-running, giving you predictable
+    execution semantics.
+  </Accordion>
+</AccordionGroup>

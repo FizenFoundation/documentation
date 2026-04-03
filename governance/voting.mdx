@@ -1,0 +1,178 @@
+---
+title: "Voting"
+description: "Understand how voting works in Fizen governance, including voting options, power calculation, delegation, quorum requirements, and how to cast your vote."
+keywords: ["voting", "governance", "quorum", "veto", "delegation", "FIZEN", "staking"]
+---
+
+Voting is how the Fizen community makes binding decisions. When a governance proposal reaches the voting period, every staked FIZEN token holder has the right to participate. This page explains how your vote is weighted, what your options mean, and what happens after the voting period closes.
+
+## Voting options
+
+Every voter chooses exactly one option per proposal.
+
+<AccordionGroup>
+  <Accordion title="Yes">
+    You support the proposal as written and want it to be enacted. A Yes vote contributes to both the quorum and the approval threshold.
+  </Accordion>
+  <Accordion title="No">
+    You oppose the proposal but consider it a legitimate submission that does not warrant punishment. Depositors are refunded regardless of a No majority. A No vote contributes to quorum but works against the approval threshold.
+  </Accordion>
+  <Accordion title="No with Veto">
+    You consider the proposal harmful, spam, or malicious. A sufficiently large No with Veto share triggers deposit slashing — all deposited FIZEN is burned rather than returned. Use this option sparingly and only when a proposal represents a genuine threat to the network or community norms.
+
+    <Warning>
+      Casting No with Veto on a legitimate proposal you simply disagree with is considered governance misconduct. This option exists to protect against bad actors, not to punish unpopular ideas.
+    </Warning>
+  </Accordion>
+  <Accordion title="Abstain">
+    You want your stake to count toward quorum without influencing the Yes/No outcome. Abstain votes help a proposal reach quorum — ensuring a decision is made — while explicitly signaling that you are neutral on the substance.
+  </Accordion>
+</AccordionGroup>
+
+## How voting power is calculated
+
+Your voting power equals your **staked FIZEN balance** at the time the proposal enters the voting period. Tokens that are unbonding or held in a wallet without being staked do not contribute to voting power.
+
+```
+Voting power = staked FIZEN (bonded) at voting snapshot
+```
+
+Voting power is not affected by:
+
+- Rewards that have not yet been claimed
+- Tokens held in liquidity pools or DeFi protocols
+- Tokens in the unbonding queue
+
+<Note>
+  The snapshot is taken when the proposal transitions from the deposit period to the voting period, not when you actually cast your vote. Staking tokens after a proposal enters voting does not increase your power for that proposal.
+</Note>
+
+## Delegation and validator voting
+
+Most FIZEN holders stake by delegating their tokens to a validator. Delegation affects governance in the following way:
+
+- **If you do not vote**, your validator's vote is applied to your delegated stake by default.
+- **If you vote directly**, your vote overrides your validator's vote for your share of the stake — regardless of when you vote during the voting period.
+
+This means you always retain full governance autonomy. Delegating to a validator is a convenience, not a surrender of your voting rights.
+
+<Tip>
+  Before delegating, review your validator's published governance policy. Many validators publicly commit to voting positions on common proposal types. Choose a validator whose governance philosophy aligns with yours.
+</Tip>
+
+**How validators vote on behalf of delegators**
+
+When a validator casts a vote, that vote is applied to:
+1. The validator's own self-bonded stake.
+2. All delegated stake from delegators who have not voted directly on that proposal.
+
+If a delegator overrides the validator's vote, the delegator's stake is reassigned to their chosen option and subtracted from the validator's weighted vote.
+
+<Info>
+  Validators are not required to vote. If a validator does not vote on a proposal, delegators who have not voted directly will not contribute to any vote option — effectively reducing their stake's influence on the outcome. This is one reason to choose active validators with strong governance participation rates.
+</Info>
+
+## Quorum, threshold, and veto requirements
+
+A proposal must satisfy all three conditions to pass.
+
+| Requirement | Definition | Default value |
+|---|---|---|
+| **Quorum** | Minimum share of total staked FIZEN that must vote (Yes, No, No with Veto, or Abstain) | 33.4% |
+| **Threshold** | Minimum share of non-Abstain votes that must be Yes | 50% |
+| **Veto threshold** | Maximum share of total votes that can be No with Veto before the proposal is vetoed | 33.4% |
+
+A proposal passes when:
+1. Quorum is reached.
+2. Yes votes exceed 50% of all non-Abstain votes.
+3. No with Veto votes do not exceed 33.4% of all votes.
+
+A proposal is vetoed — and all deposits are burned — when No with Veto votes exceed 33.4% of total votes cast, regardless of the Yes/No split.
+
+<Note>
+  These parameters are themselves governable. The community can change quorum, threshold, and veto thresholds through a parameter change proposal.
+</Note>
+
+## Voting period duration
+
+The standard voting period is **7 days** from the moment a proposal reaches full deposit. The voting period cannot be extended once it has started.
+
+All votes must be cast before the voting period closes. Votes submitted in the same block as the closing block may or may not be included, depending on transaction ordering — do not wait until the last minute.
+
+## How to cast your vote
+
+<Tabs>
+  <Tab title="CLI">
+    Use the Fizen CLI to vote from the command line. Replace `<proposal-id>` with the numeric ID of the proposal and `<option>` with `yes`, `no`, `no_with_veto`, or `abstain`.
+
+    ```bash
+    fizen tx gov vote <proposal-id> <option> \
+      --from <your-key-name> \
+      --chain-id fizen-mainnet-1 \
+      --gas auto \
+      --gas-adjustment 1.4
+    ```
+
+    To check the current tally before voting:
+
+    ```bash
+    fizen query gov tally <proposal-id>
+    ```
+
+    To list all active proposals:
+
+    ```bash
+    fizen query gov proposals --status voting_period
+    ```
+  </Tab>
+  <Tab title="Wallet interface">
+    Most wallets that support Fizen include a built-in governance interface. To vote:
+
+    1. Open your wallet and navigate to the **Governance** section.
+    2. Find the proposal by its ID or title.
+    3. Review the proposal description and any linked forum discussion.
+    4. Select your vote option: Yes, No, No with Veto, or Abstain.
+    5. Confirm the transaction and pay the gas fee.
+
+    Your vote is recorded on-chain once the transaction is included in a block.
+  </Tab>
+  <Tab title="Governance dashboard">
+    The Fizen governance dashboard provides a web interface for browsing proposals, reading discussion context, and submitting votes.
+
+    1. Connect your wallet to the dashboard.
+    2. Browse open proposals in the **Active Votes** section.
+    3. Click a proposal to read the full description and view the current tally.
+    4. Select your vote option and click **Submit Vote**.
+    5. Approve the transaction in your wallet.
+
+    <Info>
+      The dashboard aggregates forum discussion links and validator voting positions in one place, making it easier to research proposals before voting.
+    </Info>
+  </Tab>
+</Tabs>
+
+## What happens after the vote closes
+
+**If the proposal passes:**
+
+- The outcome is recorded on-chain and all deposits are returned to contributors.
+- Execution is immediate for parameter change proposals (effective at the next block) and automatic for spend proposals (funds transfer occurs at the next block).
+- Upgrade proposals take effect at the pre-specified block height.
+- Text proposals are recorded as passed signals with no automated execution.
+
+**If the proposal fails (did not meet threshold or quorum):**
+
+- The outcome is recorded on-chain as rejected.
+- All deposits are returned to contributors.
+- No changes are made to the protocol.
+- The proposer may revise and resubmit, taking into account the voting feedback.
+
+**If the proposal is vetoed:**
+
+- The outcome is recorded on-chain as vetoed.
+- All deposits are burned permanently — neither the proposer nor other contributors receive their FIZEN back.
+- The proposal cannot be automatically resubmitted. A new proposal on the same topic requires a fresh deposit.
+
+<Warning>
+  If you contributed to the deposit of a proposal that was subsequently vetoed, you lose your deposit regardless of how you voted. Evaluate proposals carefully before contributing deposit funds.
+</Warning>

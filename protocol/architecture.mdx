@@ -1,0 +1,132 @@
+---
+title: "Architecture"
+description: "A technical breakdown of the Fizen protocol's layered architecture, node types, state model, and network topology."
+keywords: ["fizen", "architecture", "validator", "full node", "light client", "state", "peer discovery"]
+---
+
+## Layer structure
+
+The Fizen protocol is organized into three distinct layers. Each layer has a well-defined responsibility and communicates with adjacent layers through stable interfaces. This separation keeps each layer independently upgradeable and allows different implementations to interoperate.
+
+<Tabs>
+  <Tab title="Base layer">
+    The base layer is the protocol itself: consensus, state machine, and peer-to-peer networking. It is the only layer that all participants must agree on. Changes to the base layer require a coordinated protocol upgrade (hard fork or soft fork, depending on scope).
+
+    Responsibilities:
+    - Validator coordination and block production
+    - Transaction ordering and execution
+    - State root computation and commitment
+    - Peer discovery and block propagation
+  </Tab>
+  <Tab title="Application layer">
+    The application layer is where smart contracts and protocol-native modules live. Applications interact with the base layer through a well-typed execution environment that exposes state reads, state writes, event emission, and cross-contract calls.
+
+    The application layer is sandboxed: a misbehaving application cannot corrupt the base-layer state or halt the network. Gas metering bounds computation, and the execution environment enforces strict memory isolation.
+
+    Responsibilities:
+    - Smart contract deployment and invocation
+    - Protocol-native module execution (token transfers, governance votes, staking operations)
+    - Cross-contract message passing
+    - Event indexing for off-chain consumers
+  </Tab>
+  <Tab title="Interface layer">
+    The interface layer is everything outside the protocol that users and developers interact with: wallets, explorers, indexers, SDKs, and RPC endpoints. The interface layer is not part of the protocol's trust boundary — it makes no consensus-level guarantees — but it is essential to usability.
+
+    Fizen exposes a versioned JSON-RPC API and a gRPC streaming API at this layer. Both APIs are documented separately in the API reference.
+
+    Responsibilities:
+    - Transaction construction and signing utilities
+    - State queries and event subscriptions
+    - Block and transaction explorers
+    - Off-chain indexing and analytics
+  </Tab>
+</Tabs>
+
+## Node types and their roles
+
+Not every participant in the Fizen network runs the same software. Different node types make different commitments to the network and receive different capabilities in return.
+
+### Validator nodes
+
+Validator nodes are the backbone of the protocol. They participate directly in consensus: they propose blocks, vote on candidate blocks, and commit finalized state. To become a validator, an operator must bond a minimum stake of FZN tokens. This stake is slashable — if the validator behaves maliciously or exhibits prolonged downtime, a portion of the bond is destroyed.
+
+Validators must meet strict hardware and connectivity requirements because they are on the critical path for block production. The active validator set is capped at a fixed size determined by governance, ensuring that the BFT consensus rounds complete within the target slot time.
+
+<Warning>
+  Running a validator node without adequate infrastructure — redundant power,
+  high-bandwidth symmetric internet, and geographic distribution from other
+  validators — significantly increases the risk of downtime penalties and
+  slashing.
+</Warning>
+
+### Full nodes
+
+Full nodes download every block, re-execute every transaction, and maintain a complete, independently verified copy of the current state. They do not participate in consensus and cannot propose or vote on blocks, but they serve as the network's read infrastructure.
+
+Full nodes are what wallets, dApps, and explorers connect to. They answer RPC queries, relay user transactions to validators, and provide data availability guarantees to light clients. Anyone can run a full node without bonding stake.
+
+### Light clients
+
+Light clients verify only block headers and Merkle proofs rather than re-executing full blocks. They trust that the validator set has produced an honest chain (verified by checking validator signatures on headers) and use Merkle proofs to confirm specific pieces of state — such as their own account balance — without downloading the entire state trie.
+
+Light clients are designed for resource-constrained environments: mobile wallets, browser extensions, and embedded systems. They sacrifice full verification for low storage and bandwidth requirements.
+
+<Info>
+  Light clients in Fizen do not trust any single full node for their data.
+  They verify every Merkle proof against the state root committed by the
+  validator supermajority. A malicious full node cannot forge a valid proof
+  without breaking the underlying hash function.
+</Info>
+
+## State management and data availability
+
+The global state of the Fizen protocol is stored as a sparse Merkle tree keyed by account address (for account state) and by contract storage slot (for application state). After each block is committed, the tree's root hash is included in the block header. This root is signed by the validator supermajority and serves as a cryptographic commitment to the entire world state at that block height.
+
+### State pruning
+
+Full nodes have the option to prune historical state — retaining only the current state trie rather than every historical version. Archival nodes retain the full history and serve it to clients that need to query historical state at a specific block height.
+
+### Data availability
+
+Every transaction included in a committed block must be fully available on the network. Fizen does not separate execution from data availability at the base layer; validators are required to broadcast complete block data before the block can be committed. This guarantee means any full node can independently reconstruct the current state from genesis without trusting anyone else.
+
+```text
+Block header
+├── parent_hash
+├── height
+├── timestamp
+├── proposer_address
+├── validator_set_hash
+├── state_root          ← Merkle root of the full state trie
+├── transactions_root   ← Merkle root of the transaction list
+└── receipts_root       ← Merkle root of execution receipts
+```
+
+## Network topology and peer discovery
+
+The Fizen network uses a hybrid topology. Validators maintain a fully connected mesh among themselves for low-latency consensus message exchange. The broader network of full nodes and light clients forms a structured overlay using a Kademlia-based distributed hash table (DHT) for peer discovery.
+
+### Peer discovery
+
+When a new node joins the network, it contacts a set of well-known bootstrap nodes to obtain an initial peer list. It then uses the DHT to discover additional peers, gradually expanding its view of the network. Bootstrap nodes are not trusted for data — they are only used to find peers, and the node independently verifies all data it receives.
+
+### Block propagation
+
+Once a block is committed, the proposer broadcasts it to its immediate peers, who re-broadcast it to their peers. This epidemic (gossip) propagation ensures the block reaches all full nodes within a small number of network hops. The protocol includes a compact block relay optimization: full nodes that have already seen the pending transactions only receive the transaction identifiers rather than full transaction bodies, reducing bandwidth significantly.
+
+### Transaction gossiping
+
+User transactions enter the network through any full node or validator. The receiving node validates the transaction and adds it to the mempool, then gossips it to peers. Transactions propagate through the full-node overlay before reaching validators. Validators maintain their own mempool view and independently select transactions for inclusion in blocks.
+
+<Note>
+  **Architecture diagram**
+
+  Imagine three concentric rings. The innermost ring is the validator mesh: a
+  small, fully connected set of high-performance nodes that run consensus. The
+  middle ring is the full-node overlay: a large, loosely connected peer-to-peer
+  network that propagates blocks and transactions and answers RPC queries. The
+  outermost ring is the interface layer: wallets, explorers, and SDKs that
+  connect to full nodes over authenticated RPC. Light clients sit at the edge,
+  connecting to one or more full nodes but verifying all data cryptographically
+  rather than trusting the node.
+</Note>

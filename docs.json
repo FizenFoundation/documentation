@@ -1,0 +1,66 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "Fizen Foundation",
+  "theme": "willow",
+  "colors": {
+    "primary": "#2D6BE4",
+    "light": "#EEF3FC",
+    "dark": "#1A3F8F"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/FizenFoundation/whitepaper"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Whitepaper",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "introduction",
+              "vision",
+              "problem-statement"
+            ]
+          },
+          {
+            "group": "Protocol",
+            "pages": [
+              "protocol/overview",
+              "protocol/architecture",
+              "protocol/consensus",
+              "protocol/security"
+            ]
+          },
+          {
+            "group": "Tokenomics",
+            "pages": [
+              "tokenomics/overview",
+              "tokenomics/distribution",
+              "tokenomics/utility"
+            ]
+          },
+          {
+            "group": "Governance",
+            "pages": [
+              "governance/overview",
+              "governance/proposals",
+              "governance/voting"
+            ]
+          },
+          {
+            "group": "Ecosystem",
+            "pages": [
+              "ecosystem/roadmap",
+              "ecosystem/partners",
+              "ecosystem/community"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

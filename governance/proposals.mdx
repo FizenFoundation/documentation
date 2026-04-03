@@ -1,0 +1,150 @@
+---
+title: "Proposals"
+description: "Learn how to submit and manage governance proposals in Fizen, including proposal types, lifecycle, deposit requirements, and best practices."
+keywords: ["proposals", "governance", "deposit", "voting", "on-chain", "FIZEN"]
+---
+
+A governance proposal is a formal, on-chain request for the Fizen community to make a binding decision. Before a proposal reaches a vote, it must be drafted, deposited, and pass a community review period. This page walks you through every stage of the process.
+
+## Proposal types
+
+Fizen supports four proposal types. Choosing the right type ensures that the network can route and execute your proposal correctly.
+
+<AccordionGroup>
+  <Accordion title="Text proposals">
+    A signaling mechanism for ideas that do not require automatic on-chain execution. Use a text proposal to gauge community sentiment on a roadmap direction, a policy change, or a strategic decision that will be implemented off-chain by the Foundation or a working group.
+
+    Text proposals pass or fail but do not trigger any automated action.
+  </Accordion>
+  <Accordion title="Parameter change proposals">
+    Modify one or more on-chain parameters without a software upgrade. Examples include adjusting the minimum staking reward rate, changing the unbonding period, or updating transaction fee floors.
+
+    Parameter change proposals execute automatically when they pass — the new values take effect at the start of the next block after the proposal is enacted.
+  </Accordion>
+  <Accordion title="Spend proposals">
+    Request a disbursement of FIZEN from the community treasury. You must specify the recipient address, the token amount, and a clear description of what the funds will be used for.
+
+    The community treasury is funded by a portion of transaction fees and inflation rewards. Spend proposals are the primary mechanism for community grants and ecosystem development funding.
+  </Accordion>
+  <Accordion title="Upgrade proposals">
+    Schedule a coordinated software upgrade to the Fizen protocol. An upgrade proposal specifies the target block height at which validators must upgrade their nodes. If the proposal passes, nodes that have not upgraded by the target height will halt and be unable to continue validating until they update.
+
+    Use upgrade proposals for any change that requires new consensus logic, a new runtime version, or breaking changes to the wire protocol.
+  </Accordion>
+</AccordionGroup>
+
+## Requirements to submit a proposal
+
+Before a proposal enters the deposit period, you must meet two requirements:
+
+**Minimum deposit** — you must attach an initial deposit of at least **500 FIZEN** when submitting the proposal. If the full deposit threshold of **10,000 FIZEN** is not reached during the deposit period (14 days), the proposal does not advance to voting and your initial deposit is returned.
+
+<Note>
+  Other community members can contribute to the deposit on your behalf. You are not required to provide the full 10,000 FIZEN yourself, but you are responsible for making sure the threshold is reached within the deposit window.
+</Note>
+
+**Written rationale** — every proposal must include a human-readable description explaining what is being proposed and why. A proposal with an empty or inadequate description is unlikely to attract sufficient deposit contributions or votes.
+
+## Proposal lifecycle
+
+Every Fizen governance proposal moves through four stages.
+
+<Steps>
+  <Step title="Draft">
+    You prepare the proposal off-chain. At minimum, a draft should include a title, a full description of the change, a motivation section explaining the problem being solved, and — for parameter or upgrade proposals — the exact technical parameters being changed.
+
+    Before submitting on-chain, post your draft to the Fizen governance forum and allow at least five days for community feedback.
+  </Step>
+  <Step title="Deposit">
+    You submit the proposal on-chain with your initial deposit. The proposal enters a 14-day deposit window. If the total deposited FIZEN reaches 10,000 before the window closes, the proposal automatically advances to voting. If the threshold is not met, the proposal expires.
+
+    <Warning>
+      If a proposal is deemed spam or malicious by the community (indicated by a "No with Veto" majority in the subsequent vote), **all deposits are burned** — not returned. Ensure your proposal is substantive before submitting.
+    </Warning>
+  </Step>
+  <Step title="Voting">
+    Once fully deposited, the proposal enters a 7-day voting period. All staked FIZEN holders can cast their votes. At the close of the voting period, the outcome is determined based on quorum and threshold rules. See the [Voting](/governance/voting) page for full details on how votes are counted.
+  </Step>
+  <Step title="Execution">
+    If the proposal passes, execution depends on the proposal type:
+
+    - **Text proposals** — no automated action; the outcome is recorded on-chain as a signal.
+    - **Parameter change proposals** — parameters update automatically at the next block.
+    - **Spend proposals** — funds are transferred to the specified recipient address.
+    - **Upgrade proposals** — the upgrade is scheduled at the specified block height.
+
+    If the proposal fails, no action is taken. Deposits are returned to all contributors (unless the proposal was vetoed).
+  </Step>
+</Steps>
+
+## How to write a strong proposal
+
+A well-written proposal is more likely to attract deposit support, generate productive discussion, and earn votes. Follow these practices:
+
+**Start with community discussion.** Post a pre-proposal to the Fizen governance forum before submitting on-chain. Use the discussion to refine your motivation, surface objections, and build early support. A proposal that arrives on-chain with zero forum discussion rarely passes.
+
+**Write a clear motivation section.** Explain the problem you are solving. Voters need to understand why the current state is inadequate, not just what you want to change.
+
+**Be specific about implementation.** For parameter changes, list the exact parameter names and new values. For spend proposals, name the recipient and provide a detailed budget. For upgrades, reference the commit hash or release tag.
+
+**Anticipate objections.** Address the most obvious counterarguments in the proposal itself. This signals that you have thought the proposal through and makes it harder for bad-faith opposition to manufacture doubt.
+
+**Keep the summary short.** Validators and large delegators review many proposals. The first two sentences of your description should stand alone as a complete summary of what you are asking for and why.
+
+<Tip>
+  Reference any relevant forum discussion threads in your on-chain proposal description. This gives voters a single place to find the full context.
+</Tip>
+
+## Proposal rejection and deposit slashing
+
+Deposits are handled differently depending on why a proposal fails:
+
+| Outcome | Deposit fate |
+|---|---|
+| Proposal passes | All deposits returned to contributors |
+| Proposal fails (did not reach quorum or threshold) | All deposits returned to contributors |
+| Proposal fails (deposit period expired without reaching threshold) | All deposits returned to contributors |
+| Proposal vetoed (No with Veto majority) | All deposits burned |
+
+<Warning>
+  Do not submit proposals that are clearly spam, duplicate existing on-chain proposals, or are designed to exploit treasury funds. The veto mechanism exists specifically to protect against these cases, and it results in the permanent loss of all deposited FIZEN.
+</Warning>
+
+## Step-by-step guide for submitting a proposal
+
+<Steps>
+  <Step title="Draft your proposal">
+    Write your proposal document. Include a title, a one-paragraph summary, a motivation section, a detailed description of the change, and — if applicable — the exact technical parameters or recipient address.
+  </Step>
+  <Step title="Post to the governance forum">
+    Publish your draft on the Fizen governance forum. Give the community at least five days to respond. Incorporate substantive feedback before moving on-chain.
+  </Step>
+  <Step title="Prepare your transaction">
+    Construct your governance transaction. You will need the Fizen CLI or a compatible wallet interface. Specify the proposal type, attach your description (either inline or as a JSON metadata file pinned to IPFS), and include your initial deposit.
+
+    ```bash
+    fizen tx gov submit-proposal \
+      --type parameter_change \
+      --title "Reduce unbonding period to 14 days" \
+      --description "$(cat proposal-description.txt)" \
+      --deposit 500000000ufizen \
+      --from <your-key-name> \
+      --chain-id fizen-mainnet-1 \
+      --gas auto \
+      --gas-adjustment 1.4
+    ```
+
+    <Note>
+      Token amounts are specified in `ufizen` (micro-FIZEN). 1 FIZEN = 1,000,000 ufizen. A 500 FIZEN deposit is `500000000ufizen`.
+    </Note>
+  </Step>
+  <Step title="Share the proposal ID">
+    Once your transaction is confirmed, the network assigns your proposal a numeric ID. Share that ID in your forum thread so community members can contribute to the deposit and begin deliberating.
+  </Step>
+  <Step title="Campaign for deposit contributions">
+    Reach out to validators, large delegators, and community members to contribute to the deposit. Provide your forum thread and any supporting materials. The deposit period closes after 14 days.
+  </Step>
+  <Step title="Monitor the voting period">
+    Once the deposit threshold is reached, the voting period opens. Continue engaging with the community, answering questions, and addressing concerns as they arise. You cannot modify the proposal once it is on-chain, so all clarifications must be made in forum posts and social channels.
+  </Step>
+</Steps>

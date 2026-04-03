@@ -1,0 +1,100 @@
+---
+title: "Problem statement"
+sidebarTitle: "Problem statement"
+description: "The fundamental problems with existing financial and protocol infrastructure that the Fizen Foundation was built to solve."
+keywords: ["Fizen", "problem statement", "centralization", "governance", "transparency", "decentralized protocol"]
+---
+
+Fizen does not exist in a vacuum. It was designed as a deliberate response to structural failures in existing systems — failures that affect developers, institutions, and individuals in ways that compound over time. This page describes those problems clearly, and explains how Fizen addresses each of them.
+
+## Centralization of critical infrastructure
+
+Most of the systems that underpin digital economic activity today are controlled by a small number of centralized intermediaries. These include financial settlement networks, identity providers, and the protocol layers that applications are built on. This concentration has predictable consequences:
+
+- **Single points of failure**: When a centralized system goes down, every participant depending on it loses access simultaneously. There is no fallback and no redundancy at the protocol level.
+- **Unilateral rule changes**: Centralized operators can change terms of service, fees, access conditions, or technical interfaces without meaningful recourse for those who depend on the system.
+- **Capture risk**: Centralized institutions are susceptible to regulatory capture, corporate acquisition, and political pressure in ways that compromise their original purpose over time.
+- **Geographic and jurisdictional exclusion**: Centralized systems impose jurisdictional restrictions that exclude entire populations from access — not because of anything those populations have done, but because of where they are.
+
+<Note>
+  Centralization is sometimes justified as a necessary trade-off for performance, compliance, or usability. Fizen's position is that these trade-offs are frequently overstated, and that decentralized systems can be designed to meet the performance and usability expectations of modern applications.
+</Note>
+
+### How Fizen addresses this
+
+The Fizen protocol is designed from the ground up to have no single point of control. The consensus mechanism distributes validation across an open set of node operators. Governance is conducted on-chain, so no central authority can unilaterally change protocol rules. The foundation itself is structured to reduce its own power over time, not to entrench it.
+
+## Barriers to governance participation
+
+In most systems — even those that claim to be community-driven — meaningful governance participation is effectively limited to a small group of insiders. The barriers take several forms:
+
+- **Capital requirements**: Governance rights are often proportional to token holdings, which means that early investors and large holders have disproportionate influence over decisions that affect the entire community.
+- **Information asymmetry**: Proposals are often complex, technical, and poorly documented. Most participants lack the context to evaluate them meaningfully, which concentrates effective decision-making power among those with the resources to analyze proposals in depth.
+- **Process opacity**: Governance discussions frequently happen in private channels, closed forums, or off-chain venues before a formal on-chain vote. By the time a proposal reaches a vote, the outcome is often already determined.
+- **Low perceived impact**: When participants believe their vote has no meaningful effect, they do not participate. Low participation rates in turn allow small, coordinated groups to pass proposals that do not reflect the community's actual preferences.
+
+<Warning>
+  Governance systems that appear decentralized but are controlled in practice by a small coalition of large holders are sometimes described as "governance theater." Fizen's design explicitly addresses the mechanisms that enable this outcome.
+</Warning>
+
+### How Fizen addresses this
+
+Fizen's governance model is designed to reduce each of these barriers:
+
+- **Delegation**: Token holders who do not want to vote on every proposal can delegate their voting power to trusted community members without giving up custody of their tokens
+- **Transparent proposal process**: All governance discussions occur in public forums, and proposals must meet minimum documentation standards before they can advance to an on-chain vote
+- **Quorum and timelocks**: Proposals require sufficient participation to pass, and a timelock between approval and execution gives the community time to review and respond to any decision
+- **Weighted voting with caps**: The voting weight model is designed to prevent any single actor from holding enough voting power to pass proposals unilaterally
+
+## Lack of transparency in traditional systems
+
+Traditional financial and protocol infrastructure operates as a black box. Participants — whether they are developers integrating an API, users transacting on a payment network, or institutions settling through a clearinghouse — have limited visibility into how decisions are made, how funds are managed, or how system rules are being enforced.
+
+This lack of transparency creates several interconnected problems:
+
+<AccordionGroup>
+  <Accordion title="Unverifiable claims">
+    Centralized systems can claim to operate fairly, to hold reserves, or to follow stated policies — but participants have no independent way to verify these claims. Trust is demanded without evidence.
+  </Accordion>
+  <Accordion title="Hidden conflicts of interest">
+    The entities that operate infrastructure often also participate in the markets that infrastructure enables. Without transparency, conflicts of interest are invisible until they cause harm.
+  </Accordion>
+  <Accordion title="Audit inaccessibility">
+    Even where audits exist, they are typically commissioned by the operator, conducted by a party selected by the operator, and released selectively. Independent, continuous auditability is rarely available.
+  </Accordion>
+  <Accordion title="Policy changes without notice">
+    Centralized operators can change pricing, access policies, or technical requirements without advance notice or community input. Participants discover changes only when they are already in effect.
+  </Accordion>
+</AccordionGroup>
+
+### How Fizen addresses this
+
+Every consequential action in the Fizen protocol is recorded on-chain and permanently auditable by anyone:
+
+- **Treasury transactions** are executed on-chain and publicly visible in real time — there is no separate accounting system that participants must trust
+- **Governance votes** are recorded on-chain, including which addresses voted, how they voted, and what voting weight they held at the time
+- **Protocol upgrades** go through a defined proposal and timelock process that is publicly observable at every stage
+- **Foundation reporting** is published on a regular cadence covering treasury balances, grants disbursed, and development activity
+
+<Info>
+  On-chain transparency does not mean that all participants can see all private information. User-level transaction privacy is a separate design consideration. Transparency in Fizen applies to governance, treasury management, and protocol operations — the actions of the system itself, not the private activity of individual participants.
+</Info>
+
+## Barriers to value creation
+
+Beyond governance, existing systems impose structural barriers on who can create and capture value from the infrastructure they depend on. Application developers pay rent to platform operators. Protocol contributors are compensated at the discretion of a central authority. Value flows to the owners of infrastructure, not to those who build or use it.
+
+This is not a natural law — it is a consequence of who controls the protocol. When the protocol is owned by a corporation, value extraction in favor of shareholders is rational. When the protocol is governed by its community, the incentive structure can be designed differently.
+
+### How Fizen addresses this
+
+Fizen's tokenomics model is designed to align value creation with value capture:
+
+- **Contributors** who improve the protocol — through code, research, documentation, or community work — can receive grants from the on-chain treasury, funded by protocol fees
+- **Node operators** who secure the network are compensated through a transparent, on-chain reward mechanism rather than at the discretion of a central party
+- **Token holders** who participate in governance and staking are rewarded for their long-term commitment to the protocol
+- **Application developers** build on an open protocol with no rent-seeking layer between them and their users
+
+<Tip>
+  To understand how these mechanisms are implemented in practice, read the [Tokenomics](/tokenomics/overview) and [Governance](/governance/overview) sections of this whitepaper.
+</Tip>

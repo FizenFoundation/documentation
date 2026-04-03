@@ -1,0 +1,87 @@
+---
+title: "Overview"
+description: "An introduction to the FIZEN token — its supply model, core metrics, and role in powering the Fizen Foundation protocol."
+keywords: ["FIZEN", "token", "tokenomics", "supply", "staking", "governance", "gas"]
+---
+
+The FIZEN token is the native asset of the Fizen Foundation protocol. It is not incidental to the system — it is the mechanism through which network security, on-chain governance, and economic coordination are made possible. This page introduces the token, its supply model, and why it is structurally necessary for the protocol to operate.
+
+## What is FIZEN?
+
+FIZEN is a programmable protocol token deployed on the Fizen network. It serves three interdependent functions:
+
+1. **Network security** — Token holders stake FIZEN to participate in consensus and earn rewards. The economic stake they put at risk is what makes attacking the network prohibitively expensive.
+2. **Protocol fees** — All transactions and smart contract interactions on the Fizen network are denominated in FIZEN. A portion of each fee is burned, creating long-term deflationary pressure.
+3. **Governance** — Staked FIZEN confers voting rights over protocol upgrades, parameter changes, and treasury allocations.
+
+These three roles are tightly coupled. Removing any one of them would undermine the others: governance without stake has no economic weight; fees without a native token cannot be burned; staking without governance yields no meaningful control.
+
+## Why a token is necessary
+
+<Info>
+  This section explains the reasoning behind the token design. If you are primarily interested in allocation or mechanics, you can skip ahead to [Distribution](/tokenomics/distribution) or [Utility](/tokenomics/utility).
+</Info>
+
+A dedicated token is necessary for several reasons:
+
+- **Sybil resistance** — Governance and consensus mechanisms must be expensive to game. A freely acquirable resource cannot provide this property. FIZEN's market price and finite supply create the cost floor required.
+- **Aligned incentives** — When the people who operate the network hold the token, their financial interests are tied to the health of the protocol. A token-less system lacks this alignment.
+- **Autonomous fee markets** — A self-contained fee market — where block space is priced in the native token and fees are redistributed to validators and burned — allows the protocol to operate without relying on an external currency or off-chain payment system.
+- **Permissionless participation** — Any holder can stake, vote, or pay fees without seeking permission from any central party. The token is the credential.
+
+## Total supply and issuance model
+
+FIZEN has a fixed maximum supply of **1,000,000,000 (one billion)** tokens. No new tokens can be minted beyond this cap; the protocol's smart contracts enforce this at the consensus layer.
+
+At genesis, **700,000,000 FIZEN** (70% of the maximum supply) are minted and allocated according to the distribution schedule described in [Distribution](/tokenomics/distribution). The remaining **300,000,000 FIZEN** (30%) are reserved as staking rewards and are released on a diminishing emission schedule over approximately 10 years.
+
+<Note>
+  The staking reward reserve is not controlled by any single entity. It is held in a protocol-owned contract and released automatically according to on-chain parameters. The governance system can vote to adjust the emission rate within defined bounds.
+</Note>
+
+### Emission schedule
+
+Staking rewards are emitted in epochs. The initial annual emission rate is approximately 8% of the circulating supply. This rate decreases by 15% each year until the reward reserve is exhausted or a governance vote modifies the schedule.
+
+```text
+Year 1:  ~80,000,000 FIZEN emitted  (~8% of genesis circulating supply)
+Year 2:  ~68,000,000 FIZEN emitted
+Year 3:  ~57,800,000 FIZEN emitted
+...
+Year 10: ~23,300,000 FIZEN emitted  (reserve approaches exhaustion)
+```
+
+<Tip>
+  After the staking reward reserve is fully emitted, the protocol transitions to a fee-sustaining model. Validators are compensated entirely from transaction fees, supplemented by any governance-approved treasury grants.
+</Tip>
+
+### Burn mechanics
+
+A portion of every transaction fee is permanently burned. The default burn rate is **20% of the base fee** per transaction. This rate is a governable parameter, with a minimum floor of 10% and a maximum ceiling of 50% to prevent governance attacks that could make the token deflationary to the point of being unusable for fees.
+
+Over time, burns create deflationary pressure that offsets issuance from the staking reward reserve, and eventually — as emissions taper — reduces circulating supply below the genesis allocation.
+
+## Key token metrics
+
+| Metric | Value |
+|--------|-------|
+| **Token name** | Fizen |
+| **Ticker** | FIZEN |
+| **Maximum supply** | 1,000,000,000 FIZEN |
+| **Genesis mint** | 700,000,000 FIZEN |
+| **Staking reserve** | 300,000,000 FIZEN |
+| **Decimals** | 18 |
+| **Native chain** | Fizen Mainnet |
+| **Token standard** | Native protocol asset |
+| **Initial burn rate** | 20% of base fee |
+| **Initial staking APY (est.)** | ~8% |
+
+<Warning>
+  APY figures are estimates based on projected network activity and the initial emission schedule. Actual staking returns depend on total staked supply, fee volume, and governance decisions made after launch.
+</Warning>
+
+## Summary
+
+FIZEN is a fixed-supply token that fuels every layer of the Fizen protocol — from paying for computation to securing consensus to governing the protocol's future. Its design reflects a deliberate choice to make participation economically meaningful: holding, staking, and using FIZEN all carry real cost and real benefit.
+
+For a full breakdown of how tokens are allocated across stakeholders, see [Distribution](/tokenomics/distribution). For detail on what you can do with FIZEN once you hold it, see [Utility](/tokenomics/utility).

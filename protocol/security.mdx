@@ -1,0 +1,198 @@
+---
+title: "Security"
+description: "The Fizen protocol's threat model, cryptographic foundations, slashing conditions, and approach to formal verification and audits."
+keywords: ["fizen", "security", "threat model", "cryptography", "slashing", "byzantine fault tolerance", "audit"]
+---
+
+## Threat model
+
+The Fizen security model is explicit about what it protects against, what assumptions it makes, and where the boundaries of its guarantees lie. Understanding the threat model helps you reason clearly about what risks exist and how the protocol mitigates them.
+
+### Byzantine validators
+
+The primary threat the protocol is designed to resist is a set of validators that behave arbitrarily — sending conflicting messages, withholding votes, or attempting to commit two different blocks at the same height. Fizen's BFT consensus tolerates up to one-third of total bonded voting power being Byzantine. As long as the honest supermajority exceeds two-thirds, the protocol guarantees:
+
+- **Safety**: no two honest nodes will commit conflicting blocks at the same height.
+- **Liveness**: the network will eventually commit new blocks as long as honest validators can communicate.
+
+<Warning>
+  The one-third Byzantine threshold is a hard boundary. A coalition controlling
+  more than one-third of bonded voting power can halt the network (violate
+  liveness). A coalition controlling more than two-thirds can attempt to
+  commit a fraudulent block (violate safety). Both attacks are economically
+  costly due to slashing and reputational consequences, but neither is
+  technically impossible if the stake distribution becomes sufficiently
+  concentrated.
+</Warning>
+
+### Sybil attacks
+
+A Sybil attack involves one entity creating many fake identities to gain disproportionate influence. In Fizen, validator identity is bonded to economic stake. Creating additional validator identities does not increase influence unless you also bond proportionally more FZN tokens. The cost of a Sybil attack is therefore equivalent to the cost of acquiring the requisite stake — the attack is economically bounded rather than computationally bounded.
+
+Delegators additionally provide a social layer of Sybil resistance. Token holders who observe an unusual concentration of stake among suspiciously related validators are incentivized to redelegate, since a concentrated validator set increases their own slashing exposure.
+
+### Double-spend attacks
+
+A double-spend attack attempts to use the same tokens in two conflicting transactions that both appear final. Fizen's single-slot, BFT finality makes classic double-spending impossible under the protocol's honest-supermajority assumption: once a transaction is in a committed block, it cannot be reversed. A successful double-spend would require equivocation (committing two conflicting blocks at the same height), which is a slashable offense with cryptographic evidence left on-chain.
+
+### Denial of service
+
+Validators and full nodes are reachable over public networks and are therefore exposed to volumetric denial-of-service attacks. The protocol mitigates this at the application layer through transaction fees (spamming the mempool has a cost) and at the network layer through rate limiting and IP reputation filtering in the reference node implementation. The consensus protocol itself is resilient to a proposer going offline: the round advances to a new proposer after a timeout.
+
+### Long-range attacks
+
+A long-range attack involves an adversary that acquired a large amount of stake in the past (which has since unbonded and been sold) using that old private key material to rewrite history from a point before the stake was transferred. Fizen mitigates this through:
+
+- **Weak subjectivity checkpoints**: new nodes and nodes returning after a long absence must obtain a recent trusted state root from the social layer (a checkpoint published by the Foundation or a trusted peer) before syncing. They cannot be tricked into following a rewritten history that diverges before the checkpoint.
+- **Unbonding period**: stake cannot be withdrawn immediately. The unbonding period (21 days) ensures that any long-range fork attempt using recently unbonded stake can be detected and responded to before the attacker's keys become "safe" to use.
+
+## Security assumptions and trust boundaries
+
+<AccordionGroup>
+  <Accordion title="Honest supermajority of bonded stake">
+    The protocol's safety and liveness guarantees hold only if more than
+    two-thirds of bonded voting power is honest. This is the foundational
+    assumption. All other security properties are derived from it.
+  </Accordion>
+  <Accordion title="Cryptographic hardness">
+    The protocol assumes that the underlying cryptographic primitives — the
+    elliptic curve discrete logarithm problem for signatures, and the
+    preimage resistance of the hash function — are computationally hard to
+    break. A sufficiently powerful quantum computer capable of breaking
+    elliptic curve cryptography would undermine key security guarantees.
+    The Foundation monitors post-quantum cryptography standards and will
+    propose a migration path before quantum threats become practical.
+  </Accordion>
+  <Accordion title="Weak subjectivity for new nodes">
+    Nodes joining the network for the first time, or returning after an absence
+    longer than the unbonding period, must obtain a recent trusted checkpoint
+    from a source they trust outside the protocol (the Foundation's published
+    checkpoints, a trusted peer, a block explorer). Within that trust boundary,
+    the protocol is objective.
+  </Accordion>
+  <Accordion title="Correct client implementation">
+    The protocol's guarantees apply to correctly implemented clients. Buggy
+    node software, malicious wallet implementations, or compromised key
+    management fall outside the protocol's trust boundary. This is why audits,
+    formal verification, and open-source review matter.
+  </Accordion>
+</AccordionGroup>
+
+## Cryptographic primitives
+
+Fizen uses well-established, widely audited cryptographic primitives. Novel or experimental cryptography is avoided at the base layer.
+
+<Tabs>
+  <Tab title="Signatures">
+    Fizen uses **Ed25519** for validator consensus signatures and **secp256k1**
+    for user account signatures. Ed25519 is chosen for validator keys because of
+    its fast batch verification, which allows nodes to verify hundreds of
+    validator pre-commit signatures efficiently during block processing.
+    secp256k1 is used for user accounts to maintain compatibility with the
+    broader ecosystem of hardware wallets and signing libraries.
+
+    ```text
+    Validator keys : Ed25519 (RFC 8032)
+    Account keys   : secp256k1 (SEC 2)
+    Key derivation : BIP-32 / BIP-44 (for HD wallets)
+    ```
+  </Tab>
+  <Tab title="Hashing">
+    All Merkle tree constructions use **SHA-256** (for the state trie and
+    transaction Merkle root) and **BLAKE2b** (for internal consensus message
+    hashing, where speed is important). Block IDs are the SHA-256 hash of the
+    serialized block header.
+
+    ```text
+    State trie      : SHA-256
+    Block ID        : SHA-256
+    Consensus msgs  : BLAKE2b-256
+    ```
+  </Tab>
+  <Tab title="Encoding">
+    All consensus-critical data structures are serialized using **Protocol
+    Buffers** (protobuf) with canonical encoding rules enforced by the protocol.
+    Canonical encoding ensures that all honest nodes produce the same byte
+    sequence for the same logical message, which is essential for deterministic
+    signature verification.
+
+    ```text
+    Wire format     : Protocol Buffers v3
+    Encoding rules  : Canonical (field order enforced, no unknown fields)
+    ```
+  </Tab>
+</Tabs>
+
+## Slashing conditions and penalties
+
+Slashing is the protocol's primary enforcement mechanism. When a validator violates protocol rules in a provable way, a portion of their bonded stake — and their delegators' bonded stake — is irreversibly destroyed. The slashing evidence is submitted on-chain, making the offense publicly attributable.
+
+### Equivocation (double signing)
+
+Equivocation is the most severe slashable offense. It occurs when a validator signs two different pre-votes or pre-commits for the same round and height, producing conflicting messages. This is direct evidence of an attempt to cause a fork.
+
+```text
+Offense        : Signing conflicting messages at the same height and round
+Slash amount   : 5% of total bonded stake (validator + delegators)
+Jailing        : Permanent; requires on-chain governance vote to unjail
+Evidence TTL   : Submittable within 21 days of the offense
+Finder's fee   : 1% of slashed amount paid to the evidence submitter
+```
+
+### Downtime
+
+Validators are expected to be online and voting. Sustained downtime degrades the network's liveness and increases the load on remaining validators.
+
+```text
+Offense        : Missing > 5% of votes in any rolling 10,000-block window
+Slash amount   : 0.01% of total bonded stake
+Jailing        : Temporary; validator must wait the jail duration and
+                 submit an unjail transaction
+Jail duration  : Minimum 10 minutes; increases with repeat offenses
+```
+
+<Note>
+  Delegators bear a proportional share of any slashing penalty applied to their
+  chosen validator. Diversifying delegations across multiple validators limits
+  your exposure to any single validator's operational risk.
+</Note>
+
+### Governance attack via slashing evidence censorship
+
+A validator set that collectively refuses to include valid slashing evidence in blocks is itself a protocol violation. If the evidence submission transaction is valid, any honest validator that includes it in a proposed block is acting within the rules. A coordinated effort to censor evidence would require a Byzantine supermajority — itself a slashable condition.
+
+## Audits and formal verification
+
+Security at the protocol layer requires more than good design; it requires independent review and, where possible, mathematical proof.
+
+### External audits
+
+The Fizen core protocol and the reference node implementation are subject to recurring external security audits by independent firms specializing in distributed systems and cryptographic protocols. Audit scope includes:
+
+- Consensus implementation correctness
+- Cryptographic library usage and key handling
+- State machine execution environment and sandboxing
+- Slashing and staking module logic
+- Networking layer and peer authentication
+
+Audit reports are published in full on the Fizen Foundation's GitHub repository under the `audits/` directory. Findings and their resolutions are tracked publicly.
+
+### Formal verification
+
+Critical components of the protocol specification are formalized and verified using model checking and theorem proving tools. The consensus algorithm is specified in TLA+ and model-checked for safety and liveness properties under bounded Byzantine conditions. The state machine transition function is specified in a formally verifiable subset of the implementation language, with machine-checked proofs of determinism and termination.
+
+<Tip>
+  If you discover a potential vulnerability in the Fizen protocol or reference
+  implementation, please report it through the responsible disclosure program
+  before publishing details publicly. Instructions are available in the
+  `SECURITY.md` file in the core repository.
+</Tip>
+
+### Ongoing security practices
+
+Beyond point-in-time audits, the Foundation maintains an ongoing security posture:
+
+- **Bug bounty program**: rewards for responsibly disclosed vulnerabilities, tiered by severity.
+- **Continuous fuzzing**: the execution environment and serialization layer are fuzz-tested continuously in CI.
+- **Dependency auditing**: all third-party dependencies are pinned and reviewed; updates are gated on passing a security review.
+- **Incident response**: a defined incident response process with a security committee empowered to coordinate emergency patches and communicate with validators.

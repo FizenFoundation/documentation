@@ -1,0 +1,166 @@
+---
+title: "Consensus"
+description: "How the Fizen protocol reaches agreement — validator selection, block production, finality rules, and the economic incentives that keep the network honest."
+keywords: ["fizen", "consensus", "proof of stake", "BFT", "validators", "finality", "slashing", "block production"]
+---
+
+## Consensus algorithm
+
+Fizen uses a delegated Bonded Proof-of-Stake (dBPoS) variant layered on top of a Tendermint-style Byzantine Fault Tolerant (BFT) consensus algorithm. The combination gives you:
+
+- **Deterministic, single-slot finality** — a block is irreversible the moment it collects a two-thirds supermajority of pre-commits from the active validator set.
+- **Liveness under adversarial conditions** — the protocol makes progress as long as more than two-thirds of bonded voting power is online and honest.
+- **Predictable block times** — the slot duration is fixed at the protocol level; block production is not race-based the way proof-of-work is.
+
+<Info>
+  The BFT safety guarantee is precise: if fewer than one-third of total bonded
+  voting power is Byzantine (dishonest or compromised), the protocol cannot
+  commit two conflicting blocks at the same height. This is a hard mathematical
+  guarantee, not a probabilistic one.
+</Info>
+
+### Why delegated stake
+
+Pure BFT requires every participant to directly vote, which limits scalability. Delegated stake solves this by letting token holders assign their voting power to a validator they trust. The validator votes on their behalf. Delegation is non-custodial — delegators retain ownership of their tokens and can redelegate or undelegate at any time, subject to an unbonding period.
+
+## How validators are selected and rotated
+
+### Joining the active set
+
+To become an active validator, an operator bonds a minimum stake of FZN tokens to the staking module. Token holders can delegate additional stake to any candidate validator. The active validator set consists of the top _N_ validators by total bonded stake, where _N_ is a governance parameter (initially set to 150).
+
+Candidates outside the top _N_ are in the inactive set. They are eligible to move into the active set if a current validator is slashed, jailed, or if their own bonded stake surpasses that of the lowest-ranked active validator.
+
+### Voting power
+
+Each validator's voting power is proportional to their total bonded stake (own bond plus delegations). Voting power is recalculated at the end of every epoch (a fixed number of blocks). A single validator cannot exceed a governance-enforced cap on voting power to prevent excessive concentration.
+
+<Warning>
+  Validators approaching the voting power cap are a centralization signal.
+  Delegators are encouraged to distribute stake across a diverse set of
+  validators to preserve network decentralization.
+</Warning>
+
+### Rotation
+
+The active validator set does not change every block. Set changes happen at epoch boundaries, when:
+
+- A new candidate's bonded stake exceeds the lowest active validator's stake.
+- An active validator is jailed due to downtime or slashing.
+- An active validator voluntarily unbonds and exits.
+
+This epoch-based rotation gives the networking layer time to stabilize and avoids disruptive mid-block validator churn.
+
+## Block production and finality rules
+
+Each slot is assigned a single block proposer, selected via a weighted round-robin algorithm proportional to voting power. The proposer rotates every slot, ensuring all validators get a turn proportional to their stake.
+
+### Round structure
+
+A single consensus round proceeds as follows:
+
+<Steps>
+  <Step title="Propose">
+    The elected proposer assembles a block from the mempool, signs it, and
+    broadcasts it to all validators.
+  </Step>
+  <Step title="Pre-vote">
+    Each validator independently validates the proposed block. If valid, it
+    broadcasts a signed pre-vote for that block. If the proposer is offline or
+    the block is invalid, validators pre-vote for `nil`. Pre-votes are gossiped
+    among all validators.
+  </Step>
+  <Step title="Pre-commit">
+    Once a validator observes pre-votes from more than two-thirds of voting
+    power for the same block (a "polka"), it broadcasts a signed pre-commit for
+    that block. If no polka is reached, it pre-commits `nil`.
+  </Step>
+  <Step title="Commit">
+    Once more than two-thirds of voting power has pre-committed the same block,
+    the block is committed. Validators broadcast the full commit (the collection
+    of pre-commit signatures) so any full node can independently verify
+    finality.
+  </Step>
+</Steps>
+
+### Timeouts and round advancement
+
+If a round does not complete within its timeout window (due to a slow or absent proposer, network partition, etc.), validators advance to the next round with a new proposer. Round timeouts increase exponentially to allow for transient network delays without spinning too fast. The protocol guarantees liveness: as long as the honest supermajority is eventually connected, a block will eventually be committed.
+
+### Finality
+
+A committed block is final by protocol rule. No validator can sign a conflicting pre-commit for a different block at the same height without producing cryptographic evidence of equivocation — which is a slashable offense. You can safely treat any committed transaction as settled without waiting for additional confirmations.
+
+## Fork resolution and chain reorganization handling
+
+Because Fizen achieves single-slot finality, the canonical fork resolution question that plagues longest-chain protocols does not apply under normal operation. There is only one valid chain: the one with committed blocks.
+
+### The only valid fork scenario
+
+A fork at a committed height would require a Byzantine supermajority — more than one-third of bonded voting power colluding to sign conflicting commits. This is the protocol's primary security assumption. If this assumption breaks:
+
+1. Both forks are invalid from the protocol's perspective.
+2. The on-chain slashing evidence module can process the conflicting commit signatures and slash the offending validators.
+3. The community coordinates an out-of-band social consensus process to determine which fork is canonical, similar to hard-fork governance on any BFT chain.
+
+<Note>
+  In practice, the economic cost of executing a one-third attack is prohibitive.
+  Slashing destroys the attacker's entire bonded stake, and the attack is
+  publicly attributable — the signed equivocation evidence is on-chain for
+  anyone to see.
+</Note>
+
+### Network partitions
+
+During a network partition, neither partition can commit new blocks unless it contains more than two-thirds of voting power. The larger partition resumes block production once connectivity is restored. The smaller partition stalls but does not produce a conflicting chain, preserving safety at the cost of temporary liveness.
+
+## Economic incentives for honest participation
+
+Fizen's security model relies on aligning validator self-interest with honest behavior through a combination of rewards and penalties.
+
+### Block rewards
+
+Validators receive newly minted FZN tokens for each block they help commit. Rewards are distributed in proportion to voting power. A small community tax is withheld from each block reward and directed to the on-chain treasury, which funds protocol development via governance.
+
+### Transaction fees
+
+All transaction fees collected in a block flow to the proposer and the participating validators, split according to a protocol-defined formula. The proposer receives a slightly larger share as an incentive to keep blocks full and well-formed.
+
+### Delegator commissions
+
+Validators charge a commission rate on the rewards earned by their delegators. Commission rates are set by the validator and are visible on-chain. Delegators choose validators partly on commission rate and partly on track record (uptime, governance participation).
+
+### Penalties
+
+<Tabs>
+  <Tab title="Downtime slashing">
+    Validators that miss more than a threshold percentage of votes within a
+    sliding window are jailed and subject to a small slash of their bonded
+    stake. Jailed validators cannot propose or vote until they submit an
+    unjailing transaction, which requires waiting out a minimum jail duration.
+
+    ```text
+    Downtime threshold : 5% of votes missed in a 10,000-block window
+    Slash amount       : 0.01% of bonded stake
+    Jail duration      : 10 minutes minimum
+    ```
+  </Tab>
+  <Tab title="Double-sign slashing">
+    Validators that sign two conflicting blocks at the same height (equivocation)
+    are permanently jailed and subject to a severe slash of their bonded stake.
+    The evidence can be submitted by any full node, and the submitter receives a
+    small finder's fee from the slashed amount.
+
+    ```text
+    Slash amount : 5% of bonded stake
+    Jailing      : Permanent (requires governance to unjail)
+    Evidence TTL : Valid for up to 21 days after the offense
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  As a delegator, your bonded stake is also subject to slashing if your chosen
+  validator misbehaves. Choose validators with a strong uptime record and
+  transparent operations to minimize this risk.
+</Tip>

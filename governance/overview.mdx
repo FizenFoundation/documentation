@@ -1,0 +1,96 @@
+---
+title: "Overview"
+description: "Learn how on-chain governance works in Fizen, who can participate, and what decisions the community controls."
+keywords: ["governance", "on-chain", "FIZEN token", "decentralization", "protocol"]
+---
+
+Fizen governance puts protocol decisions in the hands of FIZEN token holders. Rather than relying on a central authority to steer the network, the Fizen Foundation uses on-chain governance to record, debate, and enact changes transparently — with every vote tallied and every decision permanently auditable on the ledger.
+
+## What on-chain governance means for Fizen
+
+On-chain governance means that binding decisions about the Fizen protocol are made through a smart-contract-enforced voting process, not through off-chain promises or foundation decrees. When a proposal passes, the network executes the outcome automatically — whether that is adjusting a protocol parameter, releasing treasury funds, or scheduling a software upgrade.
+
+This approach achieves three things:
+
+- **Transparency** — every proposal, vote, and outcome is visible to anyone who queries the chain.
+- **Accountability** — stakeholders can verify that enacted changes match what was voted on.
+- **Credible neutrality** — no single entity, including the Fizen Foundation, can unilaterally alter the protocol.
+
+<Info>
+  The Fizen Foundation retains a facilitation role during the early phases of the network. Its responsibilities are to support proposal quality, fund development, and advocate for decentralization — not to hold veto power over community decisions.
+</Info>
+
+## Who can participate
+
+Any address holding FIZEN tokens can participate in governance. Participation takes two primary forms:
+
+- **Direct voting** — stake your FIZEN tokens and vote on active proposals yourself.
+- **Delegation** — assign your voting power to a validator or trusted delegate who votes on your behalf.
+
+There is no minimum balance required to vote. You need only have FIZEN staked — either directly or via a validator — at the time a vote snapshot is taken.
+
+<Tip>
+  Even if you delegate to a validator, you can override that validator's vote on any individual proposal by casting your own vote before the voting period closes.
+</Tip>
+
+## The governance framework
+
+Voting power in Fizen governance is proportional to staked FIZEN. This bonded-stake model means that participants with long-term alignment — those willing to lock tokens and absorb slashing risk — carry the most weight in protocol decisions.
+
+The framework has three tiers of actors:
+
+<AccordionGroup>
+  <Accordion title="Token holders">
+    Any address with staked FIZEN can vote or delegate. Token holders who do not delegate are responsible for actively monitoring proposals and casting their own votes.
+  </Accordion>
+  <Accordion title="Validators">
+    Validators run the network infrastructure and often maintain significant delegated stake. When a delegator does not vote, the validator's vote is applied to the delegator's weight by default. Validators are expected to publish their governance positions publicly and vote consistently with their stated principles.
+  </Accordion>
+  <Accordion title="The Fizen Foundation">
+    The Foundation holds tokens allocated to the ecosystem reserve. It participates in governance like any other stakeholder — its votes are visible on-chain and carry no special weight beyond the tokens it controls. The Foundation publishes its voting rationale for all proposals.
+  </Accordion>
+</AccordionGroup>
+
+## Types of decisions governed on-chain
+
+The Fizen governance system covers four categories of decisions:
+
+| Decision type | Examples |
+|---|---|
+| **Protocol upgrades** | New consensus rules, runtime upgrades, hard fork scheduling |
+| **Treasury spending** | Grants, development funding, ecosystem incentives |
+| **Parameter changes** | Staking rewards, transaction fees, slashing rates, unbonding period |
+| **Signaling proposals** | Non-binding community sentiment on roadmap priorities |
+
+<Note>
+  Emergency security patches may be applied by the core development team under a time-locked multisig before a formal governance vote — but any such action must be ratified by a subsequent on-chain proposal within a defined window. This preserves security responsiveness without bypassing community oversight.
+</Note>
+
+## Progressive decentralization
+
+Fizen launches with a governance system that is already substantive, but the Foundation acknowledges that full decentralization is a process, not a launch state.
+
+The progressive decentralization roadmap has three phases:
+
+<Steps>
+  <Step title="Foundation-assisted governance">
+    In the early mainnet period, the Fizen Foundation holds a meaningful share of voting power from the ecosystem reserve. This ensures proposals have sufficient support to reach quorum while the broader token holder base grows and becomes active.
+  </Step>
+  <Step title="Community-led governance">
+    As ecosystem participation matures, the Foundation progressively reduces its active voting presence. Community validators and large independent delegators take on a greater share of governance responsibility. The Foundation publishes a schedule for reducing its reserved token allocations.
+  </Step>
+  <Step title="Fully autonomous governance">
+    The governance system operates without Foundation involvement in day-to-day proposals. The Foundation retains only the tokens it holds as a participating stakeholder, with no privileged access or veto mechanisms. All protocol evolution is driven entirely by the community.
+  </Step>
+</Steps>
+
+<Warning>
+  Progressive decentralization is a commitment, not a guarantee. The schedule depends on validator ecosystem maturity, token distribution breadth, and security assessments. The Foundation publishes quarterly updates on its decentralization progress.
+</Warning>
+
+## Next steps
+
+To engage with governance, read how to submit and manage proposals, or go directly to the voting guide to start participating.
+
+- [Proposals](/governance/proposals) — learn how to draft and submit a governance proposal.
+- [Voting](/governance/voting) — understand how to cast your vote and how outcomes are determined.

@@ -1,0 +1,196 @@
+---
+title: "Utility"
+description: "What you can do with FIZEN tokens — staking, governance, fee payment, delegation, and how burn mechanics create deflationary pressure over time."
+keywords: ["FIZEN", "token utility", "staking", "governance", "fees", "delegation", "burn", "deflationary"]
+---
+
+Holding FIZEN gives you access to every active layer of the Fizen protocol. This page explains how each use case works in practice, how they interact with each other, and what you should consider before participating.
+
+## Staking to secure the network
+
+Staking is the primary mechanism through which the Fizen network achieves consensus and distributes rewards. When you stake FIZEN, you are locking tokens in a protocol contract and signaling that you are willing to act honestly. In return, you receive a share of block rewards and transaction fees.
+
+### How staking works
+
+<Steps>
+  <Step title="Acquire FIZEN">
+    Obtain FIZEN through a supported exchange or the public sale. You need to hold tokens in a compatible wallet before you can stake.
+  </Step>
+  <Step title="Choose a validator or self-validate">
+    You can run your own validator node if you meet the minimum self-bond requirement (currently 10,000 FIZEN), or delegate to an existing validator. Most holders delegate.
+  </Step>
+  <Step title="Submit a stake transaction">
+    Use the Fizen CLI, the governance interface, or a compatible wallet to submit a staking transaction. Your tokens move from your wallet into the staking contract.
+  </Step>
+  <Step title="Earn rewards per epoch">
+    Rewards are calculated and distributed at the end of each epoch (approximately 6 hours). You can claim them manually or configure auto-compounding.
+  </Step>
+  <Step title="Unstake with an unbonding period">
+    When you decide to unstake, your tokens enter a 21-day unbonding period before they are returned to your wallet. During this period, they do not earn rewards and cannot be transferred.
+  </Step>
+</Steps>
+
+### Staking parameters
+
+| Parameter | Value |
+|-----------|-------|
+| **Minimum stake (delegator)** | 1 FIZEN |
+| **Minimum self-bond (validator)** | 10,000 FIZEN |
+| **Epoch duration** | ~6 hours |
+| **Unbonding period** | 21 days |
+| **Initial base APY (est.)** | ~8% |
+| **Slashing — double sign** | 5% of staked amount |
+| **Slashing — downtime** | 0.01% of staked amount |
+
+<Warning>
+  Slashing is irreversible. If your validator is penalized for equivocation (double-signing), 5% of all tokens bonded to that validator — including delegated tokens — are permanently burned. Choose validators with a strong track record.
+</Warning>
+
+## Governance participation
+
+Staked FIZEN gives you proportional voting weight in the Fizen on-chain governance system. Every major protocol decision — from software upgrades to fee parameter changes to treasury disbursements — goes through on-chain voting.
+
+### What you can vote on
+
+- **Protocol upgrades** — Changes to consensus rules, virtual machine versions, or core parameters.
+- **Treasury proposals** — Grants, ecosystem incentives, and Foundation expenditures drawn from the community treasury.
+- **Economic parameters** — Adjustments to the base fee burn rate, staking emission rate, slashing penalties, and unbonding period.
+- **Governance rules** — Quorum thresholds, voting periods, proposal deposit requirements.
+
+### Voting mechanics
+
+Your voting power equals your staked FIZEN balance at the time a proposal enters the voting period. Tokens staked after the snapshot block do not count for that proposal.
+
+<Tabs>
+  <Tab title="Standard proposals">
+    **Quorum:** 10% of total staked supply must vote for the result to be binding.
+
+    **Passing threshold:** Simple majority (>50% of votes cast, excluding abstentions).
+
+    **Voting period:** 7 days.
+
+    **Deposit requirement:** 1,000 FIZEN (refunded if quorum is reached; burned if the proposal is rejected with a NoWithVeto majority).
+  </Tab>
+  <Tab title="Supermajority proposals">
+    Required for changes to core economic parameters, large treasury disbursements (>1% of treasury), and modifications to governance rules themselves.
+
+    **Quorum:** 20% of total staked supply.
+
+    **Passing threshold:** 67% of votes cast.
+
+    **Voting period:** 14 days.
+
+    **Deposit requirement:** 5,000 FIZEN.
+  </Tab>
+</Tabs>
+
+<Info>
+  You can vote `Yes`, `No`, `NoWithVeto`, or `Abstain`. `NoWithVeto` is a strong rejection signal. If more than 33% of votes are `NoWithVeto`, the proposal fails regardless of the Yes/No split, and the deposit is burned rather than refunded.
+</Info>
+
+## Fee payment
+
+Every operation on the Fizen network — token transfers, smart contract calls, cross-chain messages, and protocol-level transactions — requires a fee paid in FIZEN. This serves two purposes: it compensates validators for the computational work, and it funds the burn mechanism that creates deflationary pressure.
+
+### Fee structure
+
+Fees are composed of two parts:
+
+- **Base fee** — Algorithmically set per block, adjusted up or down based on block utilization. This component is partially burned and partially distributed to validators.
+- **Priority fee (tip)** — An optional amount you add to prioritize your transaction in the mempool. Tips go entirely to the validator who includes the transaction.
+
+```text
+Total fee = (base fee × gas used) + (tip × gas used)
+
+Of the base fee:
+  - 20% is burned permanently
+  - 80% is distributed to the validator set proportionally
+```
+
+<Tip>
+  During periods of low network activity, base fees are minimal — fractions of a FIZEN. You only need to pay higher fees when block space is contested. Monitor the current base fee in the Fizen explorer before submitting high-value transactions.
+</Tip>
+
+### Gas estimation
+
+Before submitting a transaction, you can estimate the gas cost:
+
+```bash
+fizen tx estimate --from <address> --to <contract> --data <calldata>
+```
+
+The CLI returns a gas estimate and the current base fee so you can calculate your expected cost before committing.
+
+## Delegation
+
+If you want to participate in staking rewards and governance without running infrastructure, delegation is the appropriate path. You delegate your FIZEN to a validator of your choice, who stakes it on your behalf.
+
+### What delegation means
+
+- Your tokens remain in the staking contract, not in the validator's custody. A validator cannot transfer, spend, or withdraw your delegated tokens.
+- You earn rewards proportional to your delegation, minus the validator's commission fee (typically 5%–15%).
+- Your voting power is active even if you delegate. If you do not vote directly, your validator votes on your behalf by default. You can override this at any time during the voting period.
+
+### Choosing a validator
+
+<AccordionGroup>
+  <Accordion title="Uptime and reliability">
+    Validators with frequent downtime accumulate slashing penalties. Check a validator's historical uptime in the Fizen explorer — look for validators consistently above 99.5% uptime over the past 30 days.
+  </Accordion>
+  <Accordion title="Commission rate">
+    Validators charge a commission on rewards before distributing them to delegators. Lower commission increases your yield, but extremely low commissions (near 0%) may indicate unsustainable operation or a validator subsidizing activity to attract delegations.
+  </Accordion>
+  <Accordion title="Governance participation">
+    If governance alignment matters to you, review how a validator has voted on past proposals. Validators who consistently abstain or miss votes may not represent your interests effectively as a default vote proxy.
+  </Accordion>
+  <Accordion title="Self-bond ratio">
+    A validator's self-bond is the amount of their own tokens they have staked. A higher self-bond ratio means the validator has more skin in the game and faces proportionally greater loss from slashing events.
+  </Accordion>
+</AccordionGroup>
+
+### Re-delegation
+
+You can move your delegation from one validator to another without going through the 21-day unbonding period. Re-delegation is subject to a **7-day re-delegation cooldown** per validator pair — you cannot re-delegate from the same source validator more than once every 7 days.
+
+<Warning>
+  If the validator you are re-delegating from is slashed after you initiate the re-delegation but before the cooldown expires, you may still be subject to that slashing event. Re-delegation does not provide immediate protection from a slashing in progress.
+</Warning>
+
+## Burn mechanisms and deflationary pressure
+
+Every base fee burn permanently removes FIZEN from the total supply. As the network matures and transaction volume grows, cumulative burns become a meaningful economic force.
+
+### Default burn parameters
+
+| Parameter | Default value | Governable range |
+|-----------|---------------|-----------------|
+| **Base fee burn rate** | 20% | 10%–50% |
+| **NoWithVeto proposal deposit burn** | 100% of deposit | Not adjustable |
+| **Slashing — double sign** | 5% burned | 1%–10% |
+| **Slashing — downtime** | 0.01% burned | 0%–1% |
+
+### Long-term supply trajectory
+
+Burns compound over time. As block throughput increases and fee volume grows, the annual burn rate in absolute FIZEN terms rises. The protocol models three scenarios:
+
+<Tabs>
+  <Tab title="Low activity">
+    If the network sustains 50 transactions per second with an average fee of 0.001 FIZEN, annual burns approximate **5,000,000–10,000,000 FIZEN**. In this scenario, burns do not offset emissions in years 1–5 but begin to dominate after year 7.
+  </Tab>
+  <Tab title="Moderate activity">
+    At 500 transactions per second and similar fee levels, annual burns approximate **50,000,000–80,000,000 FIZEN**. This roughly balances with staking emissions from year 3 onward, producing a near-stable circulating supply.
+  </Tab>
+  <Tab title="High activity">
+    At sustained 2,000+ transactions per second, annual burns may exceed **200,000,000 FIZEN**. In this scenario, the protocol becomes net deflationary as early as year 2, with circulating supply declining over time.
+  </Tab>
+</Tabs>
+
+<Note>
+  These scenarios are projections, not guarantees. The Fizen Foundation publishes updated supply models quarterly based on observed on-chain data. The governance community can also vote to adjust the burn rate if observed dynamics differ materially from projections.
+</Note>
+
+## Summary
+
+FIZEN is a multi-utility token where each use case reinforces the others. Staking secures the network and earns you rewards. Governance gives your stake a voice in the protocol's direction. Fees keep the network running and fuel the burn mechanism. Delegation lets you participate without running infrastructure. And the burn mechanism ensures that growing usage translates into long-term value accrual for all holders.
+
+For the allocation and vesting details behind the token supply, see [Distribution](/tokenomics/distribution). For a high-level overview of the token's design rationale, see [Overview](/tokenomics/overview).
